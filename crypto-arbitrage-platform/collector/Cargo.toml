@@ -1,0 +1,19 @@
+[package]
+name = "collector"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+nautilus-core = { path = "../../nautilus_trader/crates/core" }
+nautilus-model = { path = "../../nautilus_trader/crates/model" }
+nautilus-common = { path = "../../nautilus_trader/crates/common" }
+nautilus-data = { path = "../../nautilus_trader/crates/data" }
+nautilus-binance = { path = "../../nautilus_trader/crates/adapters/binance" }
+nautilus-okx = { path = "../../nautilus_trader/crates/adapters/okx" }
+tokio = { version = "1.0", features = ["full"] }
+redis = { version = "0.25", features = ["streams"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
+tracing = "0.1"
+anyhow = "1.0"
+clap = { version = "4.0", features = ["derive"] }
