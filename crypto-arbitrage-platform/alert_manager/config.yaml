@@ -1,0 +1,37 @@
+alerts:
+  - name: "账户亏损超限"
+    level: P0
+    condition: "daily_loss > 1000"
+    channels: ["phone", "sms", "feishu"]
+    phone_interval_secs: 300
+
+  - name: "策略崩溃"
+    level: P1
+    condition: "strategy_status == 'crashed'"
+    channels: ["sms", "feishu"]
+
+  - name: "持仓超限"
+    level: P2
+    condition: "position_exceed_limit"
+    channels: ["feishu"]
+
+  - name: "策略启停"
+    level: P3
+    condition: "strategy_status in ['started', 'stopped']"
+    channels: ["feishu"]
+
+feishu:
+  webhook_url: "https://open.feishu.cn/open-apis/bot/v2/hook/your-webhook-url"
+  secret: null
+
+sms:
+  provider: "aliyun"
+  access_key: "your-access-key"
+  secret: "your-secret"
+  sign_name: "CryptoTrader"
+
+phone:
+  provider: "容联云"
+  api_url: "https://your-api-url"
+  account: "your-account"
+  token: "your-token"
