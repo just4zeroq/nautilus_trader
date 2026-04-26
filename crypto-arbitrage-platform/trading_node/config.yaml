@@ -1,0 +1,42 @@
+trader_id: "trader-001"
+instance_id: "node-001"
+redis:
+  host: "localhost"
+  port: 6379
+  password: null
+  streams_prefix: "collector"
+  external_streams:
+    - "collector:binance:tier1"
+    - "collector:binance:tier2"
+    - "collector:binance:tier3"
+    - "collector:okx:tier1"
+    - "collector:okx:tier2"
+    - "collector:okx:tier3"
+exchanges:
+  binance:
+    api_key: "your_binance_api_key"
+    api_secret: "your_binance_api_secret"
+  okx:
+    api_key: "your_okx_api_key"
+    api_secret: "your_okx_api_secret"
+strategies:
+  - id: "cross-exchange-arb-1"
+    strategy_type: "cross_exchange"
+    enabled: false
+    params:
+      spread_threshold: 10.0
+      max_position: 1.0
+      order_size: 0.1
+  - id: "triangular-arb-1"
+    strategy_type: "triangular"
+    enabled: false
+    params:
+      min_profit: 0.001
+  - id: "statistical-arb-1"
+    strategy_type: "statistical"
+    enabled: false
+    params:
+      lookback_period: 100
+      entry_threshold: 2.0
+      exit_threshold: 0.5
+      signal_type: "mean_reversion"
