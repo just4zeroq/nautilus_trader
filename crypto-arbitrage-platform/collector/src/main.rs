@@ -5,6 +5,7 @@ mod redis_publisher;
 mod registry;
 
 use crate::binance::BinanceCollector;
+use crate::okx::OKXCollector;
 use clap::Parser;
 use config::CollectorConfig;
 use tracing::info;
@@ -45,7 +46,11 @@ async fn main() -> anyhow::Result<()> {
             info!("Tier2 symbols: {:?}", collector.tier2_symbols());
             info!("Tier3 symbols: {:?}", collector.tier3_symbols());
         }
-        // ... 其他 match arms ...
+        "okx" => {
+            let collector = OKXCollector::new(&config, &config.redis, tier_config).await?;
+            info!("OKX collector created: {}", collector.collector_id());
+            info!("Tier1 symbols: {:?}", collector.tier1_symbols());
+        }
         _ => anyhow::bail!("Unknown exchange: {}", config.exchange),
     }
 
