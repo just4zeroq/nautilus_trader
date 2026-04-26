@@ -3,15 +3,18 @@ name = "trading_node"
 version = "0.1.0"
 edition = "2021"
 
+[workspace]
+
 [dependencies]
-nautilus-core = { path = "../../nautilus_trader/crates/core" }
-nautilus-model = { path = "../../nautilus_trader/crates/model" }
-nautilus-common = { path = "../../nautilus_trader/crates/common" }
-nautilus-trading = { path = "../../nautilus_trader/crates/trading" }
-nautilus-binance = { path = "../../nautilus_trader/crates/adapters/binance" }
-nautilus-okx = { path = "../../nautilus_trader/crates/adapters/okx" }
+nautilus-core = { path = "../../crates/core" }
+nautilus-model = { path = "../../crates/model" }
+nautilus-common = { path = "../../crates/common" }
+nautilus-trading = { path = "../../crates/trading" }
+nautilus-binance = { path = "../../crates/adapters/binance" }
+nautilus-okx = { path = "../../crates/adapters/okx" }
 tokio = { version = "1.0", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.9"
 tracing = "0.1"
+tracing-subscriber = "0.3"
 anyhow = "1.0"
