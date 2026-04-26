@@ -3,13 +3,15 @@ name = "collector"
 version = "0.1.0"
 edition = "2021"
 
+[workspace]
+
 [dependencies]
-nautilus-core = { path = "../../nautilus_trader/crates/core" }
-nautilus-model = { path = "../../nautilus_trader/crates/model" }
-nautilus-common = { path = "../../nautilus_trader/crates/common" }
-nautilus-data = { path = "../../nautilus_trader/crates/data" }
-nautilus-binance = { path = "../../nautilus_trader/crates/adapters/binance" }
-nautilus-okx = { path = "../../nautilus_trader/crates/adapters/okx" }
+nautilus-core = { path = "../../crates/core" }
+nautilus-model = { path = "../../crates/model" }
+nautilus-common = { path = "../../crates/common" }
+nautilus-data = { path = "../../crates/data" }
+nautilus-binance = { path = "../../crates/adapters/binance" }
+nautilus-okx = { path = "../../crates/adapters/okx" }
 tokio = { version = "1.0", features = ["full"] }
 redis = { version = "0.25", features = ["streams"] }
 serde = { version = "1.0", features = ["derive"] }
