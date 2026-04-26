@@ -1,0 +1,43 @@
+collector_id: "binance-tier1"
+exchange: "binance"
+tiers:
+  - "tier1"
+  - "tier2"
+  - "tier3"
+redis:
+  host: "localhost"
+  port: 6379
+  password: null
+  streams_prefix: "collector"
+
+# Tier 1: 活跃交易对 - 完整订单簿 + Trades
+tier1_symbols:
+  - "BTCUSDT"
+  - "ETHUSDT"
+  - "BNBUSDT"
+  - "SOLUSDT"
+  - "XRPUSDT"
+
+# Tier 2: 信号候选对 - Ticker + Trades
+tier2_symbols:
+  - "ADAUSDT"
+  - "DOGEUSDT"
+  - "AVAXUSDT"
+  - "DOTUSDT"
+  - "MATICUSDT"
+  - "LINKUSDT"
+  - "LTCUSDT"
+  - "UNIUSDT"
+
+# Tier 3: 观察列表 - 仅 Ticker
+tier3_symbols:
+  - "SHIBUSDT"
+  - "AAVEUSDT"
+  - "GRTUSDT"
+  - "FILUSDT"
+  - "THETAUSDT"
+  - "EOSUSDT"
+  - "XTZUSDT"
+  - "ALGOUSDT"
+  - "XLMUSDT"
+  - "VETUSDT"
