@@ -1,4 +1,5 @@
 mod config;
+mod strategies;
 
 use config::TradingNodeConfig;
 
