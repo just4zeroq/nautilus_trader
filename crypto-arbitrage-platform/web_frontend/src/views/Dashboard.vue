@@ -64,9 +64,11 @@
           <span class="panel-badge">Live</span>
         </div>
         <div class="signal-list">
-          <div v-for="signal in recentSignals" :key="signal.time" class="signal-item">
+          <div v-for="signal in recentSignals" :key="signal.id" class="signal-item">
             <div class="signal-time">{{ signal.time }}</div>
-            <div class="signal-strategy">{{ signal.strategy }}</div>
+            <div class="signal-source">
+              <span class="strategy-badge" :class="signal.strategyType">{{ signal.strategyName }}</span>
+            </div>
             <div class="signal-symbol">{{ signal.symbol }}</div>
             <div class="signal-action" :class="signal.signal.toLowerCase()">{{ signal.signal }}</div>
           </div>
@@ -75,38 +77,67 @@
 
       <div class="panel">
         <div class="panel-header">
-          <h2 class="panel-title">Active Positions</h2>
-          <span class="panel-count">{{ positions.length }}</span>
+          <h2 class="panel-title">Real-time Orders</h2>
+          <span class="panel-badge pulse">Live</span>
         </div>
-        <table class="positions-table">
-          <thead>
-            <tr>
-              <th>Symbol</th>
-              <th>Exchange</th>
-              <th>Side</th>
-              <th>Quantity</th>
-              <th>P/L</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="pos in positions" :key="pos.symbol">
-              <td class="symbol-cell">{{ pos.symbol }}</td>
-              <td>
-                <span class="exchange-tag" :class="pos.exchange.toLowerCase()">
-                  {{ pos.exchange === 'binance' ? 'BN' : 'OKX' }}
-                </span>
-              </td>
-              <td>
-                <span class="side-tag" :class="pos.side.toLowerCase()">{{ pos.side }}</span>
-              </td>
-              <td class="mono">{{ pos.quantity }}</td>
-              <td class="pnl-cell" :class="parseFloat(pos.pnl) >= 0 ? 'positive' : 'negative'">
-                {{ pos.pnl }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="order-list">
+          <div v-for="order in recentOrders" :key="order.id" class="order-item">
+            <div class="order-left">
+              <span class="order-symbol">{{ order.symbol }}</span>
+              <span class="exchange-tag small" :class="order.exchange">{{ order.exchange === 'binance' ? 'BN' : 'OKX' }}</span>
+            </div>
+            <div class="order-details">
+              <span class="order-side" :class="order.side.toLowerCase()">{{ order.side }}</span>
+              <span class="order-price">{{ order.quantity }} @ ${{ formatNumber(order.price) }}</span>
+            </div>
+            <div class="order-status" :class="order.status.toLowerCase()">
+              <span class="status-dot"></span>
+              {{ order.status }}
+            </div>
+          </div>
+        </div>
       </div>
+    </div>
+
+    <div class="panel full-width">
+      <div class="panel-header">
+        <h2 class="panel-title">Active Positions</h2>
+        <span class="panel-count">{{ positions.length }}</span>
+      </div>
+      <table class="positions-table">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Exchange</th>
+            <th>Strategy</th>
+            <th>Side</th>
+            <th>Quantity</th>
+            <th>Avg Price</th>
+            <th>P/L</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="pos in positions" :key="pos.id">
+            <td class="symbol-cell">{{ pos.symbol }}</td>
+            <td>
+              <span class="exchange-tag" :class="pos.exchange.toLowerCase()">
+                {{ pos.exchange === 'binance' ? 'BN' : 'OKX' }}
+              </span>
+            </td>
+            <td>
+              <span class="strategy-badge small" :class="pos.strategyType">{{ pos.strategyName }}</span>
+            </td>
+            <td>
+              <span class="side-tag" :class="pos.side.toLowerCase()">{{ pos.side }}</span>
+            </td>
+            <td class="mono">{{ pos.quantity }}</td>
+            <td class="mono">${{ formatNumber(pos.avgPrice) }}</td>
+            <td class="pnl-cell" :class="pos.pnl >= 0 ? 'positive' : 'negative'">
+              {{ pos.pnl >= 0 ? '+' : '' }}{{ formatNumber(pos.pnl) }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <div class="arbitrage-flow">
@@ -136,20 +167,90 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
-const recentSignals = ref([
-  { time: '10:30:00', strategy: 'Cross Exchange', symbol: 'BTCUSDT', signal: 'BUY' },
-  { time: '10:25:00', strategy: 'Triangular', symbol: 'ETH/USDT', signal: 'SELL' },
-  { time: '10:20:00', strategy: 'Statistical', symbol: 'ADAUSDT', signal: 'CLOSE' },
-  { time: '10:15:00', strategy: 'Cross Exchange', symbol: 'ETHUSDT', signal: 'BUY' }
+interface Signal {
+  id: string
+  time: string
+  strategyName: string
+  strategyType: string
+  symbol: string
+  signal: string
+}
+
+interface Order {
+  id: string
+  symbol: string
+  exchange: string
+  side: string
+  quantity: number
+  price: number
+  status: string
+}
+
+interface Position {
+  id: string
+  symbol: string
+  exchange: string
+  strategyName: string
+  strategyType: string
+  side: string
+  quantity: number
+  avgPrice: number
+  pnl: number
+}
+
+const recentSignals = ref<Signal[]>([
+  { id: '1', time: '10:30:00', strategyName: 'Cross Exchange', strategyType: 'cross_exchange', symbol: 'BTCUSDT', signal: 'BUY' },
+  { id: '2', time: '10:28:00', strategyName: 'Triangular', strategyType: 'triangular', symbol: 'ETH/USDT', signal: 'SELL' },
+  { id: '3', time: '10:25:00', strategyName: 'Statistical', strategyType: 'statistical', symbol: 'ADAUSDT', signal: 'CLOSE' },
+  { id: '4', time: '10:20:00', strategyName: 'Cross Exchange', strategyType: 'cross_exchange', symbol: 'ETHUSDT', signal: 'BUY' }
 ])
 
-const positions = ref([
-  { symbol: 'BTCUSDT', exchange: 'binance', side: 'LONG', quantity: '0.5', pnl: '+200.00' },
-  { symbol: 'ETHUSDT', exchange: 'okx', side: 'LONG', quantity: '5.0', pnl: '+50.00' },
-  { symbol: 'ADAUSDT', exchange: 'binance', side: 'SHORT', quantity: '1000', pnl: '-25.50' }
+const recentOrders = ref<Order[]>([
+  { id: 'order-1', symbol: 'BTCUSDT', exchange: 'binance', side: 'BUY', quantity: 0.1, price: 65420.50, status: 'FILLED' },
+  { id: 'order-2', symbol: 'BTCUSDT', exchange: 'okx', side: 'SELL', quantity: 0.1, price: 65425.70, status: 'FILLED' },
+  { id: 'order-3', symbol: 'ETHUSDT', exchange: 'binance', side: 'BUY', quantity: 2.0, price: 3520.00, status: 'FILLED' },
+  { id: 'order-4', symbol: 'ETHUSDT', exchange: 'okx', side: 'SELL', quantity: 2.0, price: 3522.50, status: 'PENDING' },
+  { id: 'order-5', symbol: 'ADAUSDT', exchange: 'binance', side: 'BUY', quantity: 500, price: 0.5820, status: 'FILLED' }
 ])
+
+const positions = ref<Position[]>([
+  { id: '1', symbol: 'BTCUSDT', exchange: 'binance', strategyName: 'Cross Exchange', strategyType: 'cross_exchange', side: 'LONG', quantity: 0.5, avgPrice: 65000, pnl: 210.25 },
+  { id: '2', symbol: 'ETHUSDT', exchange: 'okx', strategyName: 'Triangular', strategyType: 'triangular', side: 'LONG', quantity: 5.0, avgPrice: 3500, pnl: 112.50 },
+  { id: '3', symbol: 'ADAUSDT', exchange: 'binance', strategyName: 'Statistical', strategyType: 'statistical', side: 'SHORT', quantity: 1000, avgPrice: 0.58, pnl: -15.00 }
+])
+
+let orderTimer: number
+
+function formatNumber(num: number): string {
+  return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+onMounted(() => {
+  orderTimer = window.setInterval(() => {
+    const symbols = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT']
+    const exchanges = ['binance', 'okx']
+    const statuses = ['FILLED', 'PENDING', 'FILLED']
+    const sides = ['BUY', 'SELL']
+
+    const newOrder: Order = {
+      id: 'order-' + Date.now(),
+      symbol: symbols[Math.floor(Math.random() * symbols.length)],
+      exchange: exchanges[Math.floor(Math.random() * exchanges.length)],
+      side: sides[Math.floor(Math.random() * sides.length)],
+      quantity: Math.random() * 2,
+      price: Math.random() * 10000 + 1000,
+      status: statuses[Math.floor(Math.random() * statuses.length)]
+    }
+
+    recentOrders.value = [newOrder, ...recentOrders.value.slice(0, 9)]
+  }, 5000)
+})
+
+onUnmounted(() => {
+  clearInterval(orderTimer)
+})
 </script>
 
 <style scoped>
@@ -390,9 +491,141 @@ const positions = ref([
   color: var(--accent-red);
 }
 
+.signal-source {
+  display: flex;
+  align-items: center;
+}
+
+.strategy-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.strategy-badge.cross_exchange {
+  background: rgba(0, 217, 255, 0.15);
+  color: var(--accent-cyan);
+}
+
+.strategy-badge.triangular {
+  background: rgba(255, 149, 0, 0.15);
+  color: var(--accent-orange);
+}
+
+.strategy-badge.statistical {
+  background: rgba(147, 51, 234, 0.15);
+  color: #a855f7;
+}
+
+.strategy-badge.small {
+  padding: 2px 6px;
+  font-size: 9px;
+}
+
 .signal-action.close {
   background: rgba(125, 133, 144, 0.15);
   color: var(--text-secondary);
+}
+
+.order-list {
+  padding: 8px 0;
+}
+
+.order-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.15s ease;
+}
+
+.order-item:last-child {
+  border-bottom: none;
+}
+
+.order-item:hover {
+  background: rgba(0, 217, 255, 0.03);
+}
+
+.order-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.order-symbol {
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-primary);
+}
+
+.exchange-tag.small {
+  padding: 2px 6px;
+  font-size: 9px;
+}
+
+.order-details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.order-side {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.order-side.buy {
+  background: rgba(0, 255, 136, 0.15);
+  color: var(--accent-green);
+}
+
+.order-side.sell {
+  background: rgba(255, 71, 87, 0.15);
+  color: var(--accent-red);
+}
+
+.order-price {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.order-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.order-status.filled {
+  background: rgba(0, 255, 136, 0.12);
+  color: var(--accent-green);
+}
+
+.order-status.pending {
+  background: rgba(255, 149, 0, 0.12);
+  color: var(--accent-orange);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.panel-badge.pulse::before {
+  animation: blink 1s infinite;
 }
 
 .positions-table {
