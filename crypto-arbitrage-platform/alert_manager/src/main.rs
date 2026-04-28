@@ -1,10 +1,19 @@
 mod config;
 mod handlers;
 
+use clap::Parser;
 use config::AlertConfig;
 use config::AlertLevel;
 use handlers::{AlertManager, AlertNotification};
 use std::sync::Arc;
+
+#[derive(Parser, Debug)]
+#[command(name = "alert_manager")]
+#[command(about = "Crypto arbitrage alert manager")]
+struct Args {
+    #[arg(short, long, default_value = "config.yaml")]
+    config: String,
+}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -12,20 +21,18 @@ async fn main() -> anyhow::Result<()> {
         .with_max_level(tracing::Level::INFO)
         .init();
 
-    tracing::info!("Alert Manager starting...");
+    let args = Args::parse();
+    tracing::info!("Alert Manager starting, config: {}", args.config);
 
-    // 加载配置
-    let config: AlertConfig = serde_yaml::from_str(&std::fs::read_to_string("config.yaml")?)?;
-
+    let config: AlertConfig = serde_yaml::from_str(&std::fs::read_to_string(&args.config)?)?;
     tracing::info!("Loaded {} alert rules", config.alerts.len());
 
     let manager = Arc::new(AlertManager::new(config));
 
-    // 示例：发送测试告警
     let test_alert = AlertNotification {
         rule_name: "Test Alert".into(),
         level: AlertLevel::P2,
-        message: "This is a test alert".into(),
+        message: "Alert Manager started successfully".into(),
         timestamp: chrono::Utc::now().timestamp(),
     };
 

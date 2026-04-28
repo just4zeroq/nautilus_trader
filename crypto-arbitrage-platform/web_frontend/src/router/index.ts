@@ -22,6 +22,40 @@ const router = createRouter({
       path: '/positions',
       name: 'Positions',
       component: () => import('@/views/Positions.vue')
+    },
+    {
+      path: '/monitor',
+      name: 'Monitor',
+      component: () => import('@/views/Monitor.vue')
+    },
+    {
+      path: '/blacklist',
+      name: 'Blacklist',
+      component: () => import('@/views/Blacklist.vue')
+    },
+    {
+      path: '/alerts',
+      name: 'Alerts',
+      component: () => import('@/views/Alerts.vue')
+    },
+    {
+      path: '/alerts/rules',
+      redirect: '/alerts'
+    },
+    {
+      path: '/alerts/channels',
+      name: 'AlertChannels',
+      component: () => import('@/views/AlertChannels.vue')
+    },
+    {
+      path: '/alerts/history',
+      name: 'AlertHistory',
+      component: () => import('@/views/AlertHistory.vue')
+    },
+    {
+      path: '/accounts',
+      name: 'Accounts',
+      component: () => import('@/views/Accounts.vue')
     }
   ]
 })

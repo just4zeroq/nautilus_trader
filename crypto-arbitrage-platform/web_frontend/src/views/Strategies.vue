@@ -138,18 +138,6 @@ function getDisplayParams(params: Record<string, unknown>): Record<string, strin
 
 <style scoped>
 .strategies-page {
-  --bg-primary: #0a0e14;
-  --bg-secondary: #111822;
-  --bg-tertiary: #1a2232;
-  --border-color: rgba(56, 139, 253, 0.15);
-  --text-primary: #e6edf3;
-  --text-secondary: #7d8590;
-  --text-tertiary: #484f58;
-  --accent-cyan: #00d9ff;
-  --accent-green: #00ff88;
-  --accent-orange: #ff9500;
-  --accent-red: #ff4757;
-
   padding: 32px 40px;
   background: var(--bg-primary);
   min-height: 100vh;

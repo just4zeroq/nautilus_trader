@@ -17,20 +17,8 @@ pub struct CollectorConfig {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct BinanceCollectorConfig {
-    pub collector_id: String,
-    pub tiers: TierConfig,
-}
-
-#[derive(Debug, Clone, Deserialize)]
 pub struct TierConfig {
     pub tier1_symbols: Vec<String>,
     pub tier2_symbols: Vec<String>,
     pub tier3_symbols: Vec<String>,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-pub struct OKXCollectorConfig {
-    pub collector_id: String,
-    pub tiers: TierConfig,
 }

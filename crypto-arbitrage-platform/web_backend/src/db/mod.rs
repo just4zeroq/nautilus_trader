@@ -1,3 +1,6 @@
-pub mod schema;
+use sqlx::postgres::PgPool;
 
-pub use schema::*;
+pub async fn create_pool(database_url: &str) -> anyhow::Result<PgPool> {
+    let pool = PgPool::connect(database_url).await?;
+    Ok(pool)
+}

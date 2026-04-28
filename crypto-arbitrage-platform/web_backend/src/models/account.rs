@@ -30,3 +30,26 @@ pub struct OrderResponse {
     pub status: String,
     pub created_at: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AccountResponse {
+    pub id: String,
+    pub exchange: String,
+    pub label: Option<String>,
+    pub api_key_configured: bool,
+    pub api_key_mask: Option<String>,
+    pub assets: Vec<AccountBalanceResponse>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AccountListResponse {
+    pub accounts: Vec<AccountResponse>,
+    pub total: usize,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApiKeyConfigRequest {
+    pub api_key: String,
+    pub api_secret: String,
+    pub api_passphrase: Option<String>,
+}

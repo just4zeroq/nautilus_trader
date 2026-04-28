@@ -2,11 +2,11 @@ mod binance;
 mod config;
 mod okx;
 mod redis_publisher;
-mod registry;
+mod ws_client;
 
 use clap::Parser;
 use config::{CollectorConfig, TierConfig};
-use registry::CollectorRegistry;
+use std::time::Duration;
 use tracing::info;
 
 #[derive(Parser, Debug)]
@@ -42,11 +42,18 @@ async fn main() -> anyhow::Result<()> {
     info!("Streams prefix: {}", config.redis.streams_prefix);
     info!("==============================================");
 
-    // 创建 TierConfig
+    // Parse tier config using serde_yaml (already in config_content)
+    #[derive(serde::Deserialize)]
+    struct TierConfigFile {
+        tier1_symbols: Vec<String>,
+        tier2_symbols: Vec<String>,
+        tier3_symbols: Vec<String>,
+    }
+    let tier_file: TierConfigFile = serde_yaml::from_str(&config_content)?;
     let tier_config = TierConfig {
-        tier1_symbols: get_symbols_from_config(&config_content, "tier1_symbols"),
-        tier2_symbols: get_symbols_from_config(&config_content, "tier2_symbols"),
-        tier3_symbols: get_symbols_from_config(&config_content, "tier3_symbols"),
+        tier1_symbols: tier_file.tier1_symbols,
+        tier2_symbols: tier_file.tier2_symbols,
+        tier3_symbols: tier_file.tier3_symbols,
     };
 
     // 根据交易所创建 Collector
@@ -72,6 +79,29 @@ async fn main() -> anyhow::Result<()> {
     info!("Collector ready for data collection");
     info!("==============================================");
 
+    // Register with backend via REST + start WebSocket heartbeat client
+    let backend_url = std::env::var("BACKEND_URL").unwrap_or_else(|_| "http://127.0.0.1:8080".into());
+    let node_token = std::env::var("NODE_TOKEN").unwrap_or_else(|_| "dev-token".into());
+
+    let collector_id = config.collector_id.clone();
+    let exchange_name = config.exchange.clone();
+    let node_name = format!("{} Collector", &exchange_name);
+
+    let ws_client = ws_client::NodeWsClient::new(&collector_id, "collector", &backend_url, &node_token);
+    if let Err(e) = ws_client.register(&node_name, Some(&exchange_name)).await {
+        tracing::warn!("Node registration failed (backend may not be ready): {}", e);
+    }
+
+    tokio::spawn(async move {
+        loop {
+            if let Err(e) = ws_client.run().await {
+                tracing::error!("WebSocket client error: {}", e);
+            }
+            tracing::info!("Reconnecting WebSocket in 5 seconds...");
+            tokio::time::sleep(Duration::from_secs(5)).await;
+        }
+    });
+
     // 保持进程运行
     tokio::signal::ctrl_c().await?;
 
@@ -79,34 +109,3 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-/// 从配置内容中提取 symbols 列表
-fn get_symbols_from_config(content: &str, key: &str) -> Vec<String> {
-    // 简单的 YAML 解析，直接提取 symbols
-    // 实际使用时应该使用 serde_yaml 完整解析
-    let mut result = Vec::new();
-
-    // 这里简化处理，实际项目中应该完整解析 YAML
-    let search_pattern = format!("{}:", key);
-    if let Some(start_idx) = content.find(&search_pattern) {
-        let line_start = content[..start_idx].rfind('\n').map(|i| i + 1).unwrap_or(0);
-        let line_end = content[start_idx..].find('\n').map(|i| start_idx + i).unwrap_or(content.len());
-        let line = &content[line_start..line_end];
-
-        // 提取 - 开头的行作为 symbols
-        for l in line.lines().skip(1) {
-            let trimmed = l.trim();
-            if trimmed.starts_with('-') {
-                let symbol = trimmed.trim_start_matches('-').trim().trim_matches('"').trim_matches('\'');
-                if !symbol.is_empty() && !symbol.contains(':') {
-                    result.push(symbol.to_string());
-                }
-            } else if trimmed.is_empty() || trimmed.starts_with('#') {
-                continue;
-            } else if trimmed.contains(':') {
-                break;
-            }
-        }
-    }
-
-    result
-}

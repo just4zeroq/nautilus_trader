@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS orders (
+    id VARCHAR(64) PRIMARY KEY,
+    symbol VARCHAR(32) NOT NULL,
+    exchange VARCHAR(32) NOT NULL,
+    side VARCHAR(8) NOT NULL,
+    order_type VARCHAR(16) NOT NULL DEFAULT 'LIMIT',
+    price DOUBLE PRECISION NOT NULL,
+    quantity DOUBLE PRECISION NOT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'PENDING',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_orders_symbol ON orders(symbol);
+CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at DESC);

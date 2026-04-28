@@ -25,6 +25,20 @@
           </svg>
           <span>Dashboard</span>
         </router-link>
+        <router-link to="/monitor" class="nav-link" :class="{ active: $route.path === '/monitor' }">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M2 12l10-10 10 10"/>
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+          <span>Monitor</span>
+        </router-link>
+        <router-link to="/blacklist" class="nav-link" :class="{ active: $route.path === '/blacklist' }">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 12l2 2 4-4"/>
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+          <span>Blacklist</span>
+        </router-link>
         <router-link to="/strategies" class="nav-link" :class="{ active: $route.path === '/strategies' }">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
@@ -38,12 +52,27 @@
           </svg>
           <span>Markets</span>
         </router-link>
+        <router-link to="/alerts" class="nav-link" :class="{ active: $route.path.startsWith('/alerts') }">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <span>Alerts</span>
+        </router-link>
         <router-link to="/positions" class="nav-link" :class="{ active: $route.path === '/positions' }">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7"/>
             <path d="M16 19l2 2 4-4"/>
           </svg>
           <span>Positions</span>
+        </router-link>
+        <router-link to="/accounts" class="nav-link" :class="{ active: $route.path === '/accounts' }">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <path d="M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+            <path d="M6 21v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1"/>
+          </svg>
+          <span>Accounts</span>
         </router-link>
       </nav>
 

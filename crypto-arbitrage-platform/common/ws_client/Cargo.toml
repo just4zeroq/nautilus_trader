@@ -1,0 +1,15 @@
+[package]
+name = "ws_client"
+version = "0.1.0"
+edition = "2021"
+description = "WebSocket client for node registration, heartbeat, and command handling"
+
+[dependencies]
+tokio-tungstenite = "0.21"
+futures-util = "0.3"
+reqwest = { version = "0.12", features = ["json"] }
+tokio = { version = "1.0", features = ["time"] }
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+tracing = "0.1"
+anyhow = "1.0"
